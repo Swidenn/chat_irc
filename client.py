@@ -42,10 +42,22 @@ class MainGui(QMainWindow):
 
         self.nickname = SERVER.nickname
 
+        #self.addCategoryTree(SERVER.host)
+        #self.addCategoryTree("Messages Privées")
+        #self.addChildCategory(2, "#root-me_challenge")
+
         self.text = ""
 
         self.recivedMessage()
         self.show()
+
+    def addCategoryTree(self, name):
+        temp = QTreeWidgetItem(self.treeWidget)
+        temp.setText(0, name.upper())
+
+    def addChildCategory(self, category, name):
+        temp = QTreeWidgetItem(self.treeWidget.itemAt(category, 0))
+        temp.setText((self.treeWidget.itemAt(category, 0).childCount() - 1), name)
 
     def sendMessage(self, msg):
         if msg != '':

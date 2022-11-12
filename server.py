@@ -1,79 +1,29 @@
 import socket
-import asyncio
 
 
 class Server:
-    def __init__(self, host:str, port:str):
+    def __init__(self, host, port):
         self.host = host
         self.port = port
 
-        self.server_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.connect((self.host, self.port))
 
-    def close(self):
-        self.server_client.close()
-        socket.close()
+        self.nickname = None
+        self.password = None
 
-    """
-    METHODE serverConnection()
-        but: Se connecte au serveur self.host:selfport
-        args:
-            None
-        returns:
-            None
-    """
-    def serverConnection(self):
-        print(f"[+] Connexion au serveur -> {self.host}:{self.port}")
-        self.server_client.connect((self.host, self.port))
+    def connect(self, nickname, password='', user=''):
+        cmdNick = f"NICK {nickname}\r\n"
+        cmdPass = f"PASS {password}\r\n"
+        cmdUser = f"USER {nickname} {nickname} {nickname} : _{nickname}_\r\n"
 
-    """
-    METHODE serverAuthentification(nickname, password)
-        but: Authentification nom et mot_de_passe
-        args:
-            nickname: str
-            password: str
-        returns:
-            None
-    """
-    def serverAuthentification(self, nickname, password=""):
-        cmdNICK = f"NICK {nickname}\r\n"
-        cmdPASS = f"PASS {nickname}\r\n"
-        cmdUSER = f"USER {nickname} {nickname} {nickname} : _{nickname}_\r\n"
+        self.nickname, self.password = nickname, password
 
-        dataCONNECTION = [cmdPASS, cmdNICK, cmdUSER]
-        for data in dataCONNECTION:
-            self.server_client.send(data.encode())
+        data = [cmdNick, cmdPass, cmdUser]
 
-        temp = ""
-        for i in password:
-            temp += "*"
+        for element in data:
+            self.server.send(element.encode())
 
-        print(
-            "[+] Authentification: \n",
-            f"\tNom de l'utilisateur: {nickname}\n",
-            f"\tMot de passe: {temp}"
-        )
-
-    """
-    METHODE sendMessage(message)
-        but: Envoie du message sur le serveur
-        args:
-            massage: str
-        return:
-            None
-    """
-    def sendMessage(self, message):
-        msg = f"{message}\r\n"
-        self.server_client.send(msg.encode())
-
-    """
-    METHODE messageListener()
-        but: Fonction d'écoute du serveur
-        args:
-            None
-        return:
-            None
-    """
-    def messageListener(self):
-        text = self.server_client.recv(2040)
-        print(text.decode("UTF-8"))
-
+    def send(self, text):
+        text += "\r\n"
+        self.server.send(text.encode())
